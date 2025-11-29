@@ -8,6 +8,7 @@
 // Constructor
 HiTechnicServo::HiTechnicServo(uint8_t address) {
   _address = address;
+  _pwmMode = 0xAA; // Default to no timeout mode
   // Initialize position tracking to center
   for (int i = 0; i < 6; i++) {
     _servoPositions[i] = SERVO_CENTER;
@@ -15,9 +16,18 @@ HiTechnicServo::HiTechnicServo(uint8_t address) {
 }
 
 // Initialize the servo controller
-void HiTechnicServo::begin() {
+void HiTechnicServo::begin(uint8_t pwmMode) {
   Wire.begin();
   delay(100); // Allow controller to initialize
+  
+  // Store PWM mode preference
+  _pwmMode = pwmMode;
+  
+  // Enable PWM outputs
+  // 0xAA = enable without timeout (default)
+  // 0x00 = enable with 10-second timeout (requires periodic refresh)
+  writeRegister(HT_SERVO_PWM_ENABLE, _pwmMode);
+  delay(50);
   
   // Set step time to moderate speed (5)
   setStepTime(5);
@@ -102,6 +112,11 @@ void HiTechnicServo::enableServo(uint8_t servo) {
   
   // Restore last known position
   setServoPosition(servo, _servoPositions[servo - 1]);
+}
+
+// Refresh PWM enable (call periodically when using 0x00 timeout mode)
+void HiTechnicServo::refreshPWM() {
+  writeRegister(HT_SERVO_PWM_ENABLE, _pwmMode);
 }
 
 // Get register address for servo number

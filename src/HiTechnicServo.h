@@ -28,6 +28,7 @@
 #define HT_SERVO4_POS         0x45  // Servo 4 position
 #define HT_SERVO5_POS         0x46  // Servo 5 position
 #define HT_SERVO6_POS         0x47  // Servo 6 position
+#define HT_SERVO_PWM_ENABLE   0x48  // PWM enable (0x00=enable+timeout, 0xFF=disable, 0xAA=enable no timeout)
 
 // Servo selection
 #define SERVO_1 1
@@ -48,7 +49,8 @@ class HiTechnicServo {
     HiTechnicServo(uint8_t address = 0x04);
     
     // Initialize the servo controller
-    void begin();
+    // pwmMode: 0xAA = no timeout (default), 0x00 = 10-second timeout
+    void begin(uint8_t pwmMode = 0xAA);
     
     // Set servo position (0-255, where 127 is typically center)
     void setServoPosition(uint8_t servo, uint8_t position);
@@ -81,8 +83,12 @@ class HiTechnicServo {
     // Enable servo (restore last position or center)
     void enableServo(uint8_t servo);
     
+    // Refresh PWM enable (call periodically when using 0x00 timeout mode)
+    void refreshPWM();
+    
   private:
     uint8_t _address;
+    uint8_t _pwmMode; // Store PWM mode (0xAA or 0x00)
     uint8_t _servoPositions[6]; // Track last known positions
     
     // I2C communication helpers

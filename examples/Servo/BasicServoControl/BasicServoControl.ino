@@ -7,22 +7,30 @@
   Connections:
   - Arduino SDA (Pin 20) -> HiTechnic Servo SDA
   - Arduino SCL (Pin 21) -> HiTechnic Servo SCL
+  - Arduino Pin 22 -> 10kΩ resistor -> First Controller Pin 5 (daisy chain enable)
   - Connect GND between Arduino and HiTechnic controller
   - HiTechnic servo controller must be powered separately (12V TETRIX battery)
   
-  Default I2C Address: 0x04 (can be changed with jumpers)
+  Default I2C Address: 0x04 (4th controller in 7-bit addressing)
+  
+  PWM Mode: Uses 0xAA (no timeout) by default
 */
 
 #include "HiTechnicServo.h"
 
-// Create servo controller object with default address (0x04)
-HiTechnicServo servoController;
+// Create servo controller object at address 0x04 (4th controller in daisy chain)
+HiTechnicServo servoController(0x04);
 
 void setup() {
   Serial.begin(9600);
   Serial.println("HiTechnic Servo Controller - Basic Example");
   
-  // Initialize the servo controller
+  // CRITICAL: Enable Pin 22 for daisy chain addressing
+  pinMode(22, OUTPUT);
+  digitalWrite(22, HIGH);
+  Serial.println("Pin 22 enabled for daisy chain");
+  
+  // Initialize the servo controller (uses 0xAA mode by default - no timeout)
   servoController.begin();
   
   // Read and display firmware version

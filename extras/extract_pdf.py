@@ -42,7 +42,7 @@ def extract_text_from_pdf(pdf_path):
         print(f"Error: {e}")
 
 if __name__ == "__main__":
-    pdf_file = r"c:\tetrix motor controllers\HiTechnic-Servo-Controller-Specification.pdf"
+    pdf_file = r"c:\tetrix motor controllers\extras\HiTechnic-Motor-Controller-Specification.pdf"
     
     # Allow command line argument
     if len(sys.argv) > 1:

@@ -20,7 +20,10 @@
   - GND → All controllers Pin 1/2
 */
 
-#include <HiTechnicMotor.h>
+#include "HiTechnicMotor.h"
+
+// Pin 22 provides 5V for analog detection (through 10kΩ resistor to Pin 5 of first controller)
+#define ANALOG_DETECT_PIN 22
 
 // Create three motor controllers at addresses 0x01, 0x02, 0x03
 HiTechnicMotor controller1(0x01);
@@ -31,18 +34,23 @@ void setup() {
   Serial.begin(115200);
   Serial.println("=== Smooth Six Motors Demo ===");
   
+  // Enable analog detection for daisy chain addressing
+  pinMode(ANALOG_DETECT_PIN, OUTPUT);
+  digitalWrite(ANALOG_DETECT_PIN, HIGH);
+  delay(100);
+  
   // Initialize all motor controllers
   controller1.begin();
   controller2.begin();
   controller3.begin();
   delay(200);
   
-  // Set acceleration rate for all controllers
-  controller1.setAcceleration(8);  // Smooth, moderate acceleration
-  controller2.setAcceleration(8);
-  controller3.setAcceleration(8);
+  // Set acceleration rate for all controllers (1 = 2 second ramp to 100%)
+  controller1.setAcceleration(1);  // Very smooth, 2 second ramp
+  controller2.setAcceleration(1);
+  controller3.setAcceleration(1);
   
-  Serial.println("All 6 motors initialized with smooth acceleration");
+  Serial.println("All 6 motors initialized with 2-second ramp time");
   Serial.println("Starting coordinated movement patterns...\n");
 }
 

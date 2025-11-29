@@ -24,12 +24,20 @@
 
 #include <HiTechnicMotor.h>
 
+// Pin 22 provides 5V for analog detection (through 10kΩ resistor to Pin 5 of first controller)
+#define ANALOG_DETECT_PIN 22
+
 // Create motor controller at address 0x01
 HiTechnicMotor motorController(0x01);
 
 void setup() {
   Serial.begin(115200);
   Serial.println("=== HiTechnic Motor - Acceleration Control ===");
+  
+  // Enable analog detection for daisy chain addressing
+  pinMode(ANALOG_DETECT_PIN, OUTPUT);
+  digitalWrite(ANALOG_DETECT_PIN, HIGH);
+  delay(100);
   
   // Initialize motor controller
   motorController.begin();
@@ -40,10 +48,10 @@ void setup() {
 }
 
 void loop() {
-  // Demo 1: Slow acceleration
-  Serial.println("Demo 1: Slow acceleration (rate=5)");
-  motorController.setAcceleration(5);  // Slow ramp
-  motorController.setMotorPowerSmooth(MOTOR_1, 80, 5);  // Ramp to 80% forward
+  // Demo 1: Very slow acceleration (2 second ramp)
+  Serial.println("Demo 1: Very slow acceleration (rate=1, ~2 second ramp)");
+  motorController.setAcceleration(1);  // 2 second ramp to 100%
+  motorController.setMotorPowerSmooth(MOTOR_1, 80, 1);  // Ramp to 80% forward (~1.6 sec)
   
   // Call update() until ramping is complete
   while (motorController.update()) {
@@ -57,9 +65,9 @@ void loop() {
   Serial.println("Target reached!\n");
   delay(2000);
   
-  // Demo 2: Slow deceleration
-  Serial.println("Demo 2: Slow deceleration (rate=5)");
-  motorController.setMotorPowerSmooth(MOTOR_1, 0, 5);  // Ramp down to stop
+  // Demo 2: Very slow deceleration (2 second ramp)
+  Serial.println("Demo 2: Very slow deceleration (rate=1, ~1.6 second ramp)");
+  motorController.setMotorPowerSmooth(MOTOR_1, 0, 1);  // Ramp down to stop
   
   while (motorController.update()) {
     Serial.print("Current Power: ");
@@ -70,10 +78,10 @@ void loop() {
   Serial.println("Motor stopped!\n");
   delay(2000);
   
-  // Demo 3: Fast acceleration
-  Serial.println("Demo 3: Fast acceleration (rate=20)");
-  motorController.setAcceleration(20);  // Fast ramp
-  motorController.setMotorPowerSmooth(MOTOR_1, -80, 20);  // Ramp to 80% reverse
+  // Demo 3: Medium acceleration
+  Serial.println("Demo 3: Medium acceleration (rate=5, ~0.5 second ramp)");
+  motorController.setAcceleration(5);  // Medium ramp
+  motorController.setMotorPowerSmooth(MOTOR_1, -80, 5);  // Ramp to 80% reverse
   
   while (motorController.update()) {
     Serial.print("Current Power: ");
@@ -84,9 +92,9 @@ void loop() {
   Serial.println("Target reached!\n");
   delay(2000);
   
-  // Demo 4: Fast deceleration
-  Serial.println("Demo 4: Fast deceleration (rate=20)");
-  motorController.setMotorPowerSmooth(MOTOR_1, 0, 20);
+  // Demo 4: Medium deceleration
+  Serial.println("Demo 4: Medium deceleration (rate=5)");
+  motorController.setMotorPowerSmooth(MOTOR_1, 0, 5);
   
   while (motorController.update()) {
     Serial.print("Current Power: ");
@@ -98,8 +106,8 @@ void loop() {
   delay(2000);
   
   // Demo 5: Multiple speed changes with smooth transitions
-  Serial.println("Demo 5: Multiple speed changes");
-  motorController.setAcceleration(10);  // Medium ramp
+  Serial.println("Demo 5: Multiple speed changes (rate=2, ~2 sec ramps)");
+  motorController.setAcceleration(2);  // Slow ramp
   
   Serial.println("Ramping to 50%...");
   motorController.setMotorPowerSmooth(MOTOR_BOTH, 50, 10);
@@ -124,9 +132,10 @@ void loop() {
   delay(3000);
   
   // Demo 6: Continuous update in loop (non-blocking)
-  Serial.println("Demo 6: Non-blocking acceleration");
+  // Demo 6: Non-blocking acceleration
+  Serial.println("Demo 6: Non-blocking acceleration (rate=2)");
   Serial.println("Setting target to 60%, continuing with other tasks...");
-  motorController.setMotorPowerSmooth(MOTOR_1, 60, 8);
+  motorController.setMotorPowerSmooth(MOTOR_1, 60, 2);
   
   // You can do other things while motor ramps up
   for (int i = 0; i < 50; i++) {
@@ -141,7 +150,7 @@ void loop() {
   }
   
   Serial.println("\nStopping motor...");
-  motorController.setMotorPowerSmooth(MOTOR_1, 0, 15);
+  motorController.setMotorPowerSmooth(MOTOR_1, 0, 2);
   while (motorController.update()) { delay(20); }
   
   Serial.println("\n=== All demos complete! Restarting... ===\n");

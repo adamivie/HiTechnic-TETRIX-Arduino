@@ -5,10 +5,15 @@
 #include <Wire.h>
 
 void setup() {
+  // Setup Pin 22 for analog detection (required for daisy chain addressing)
+  pinMode(22, OUTPUT);
+  digitalWrite(22, HIGH);  // 5V to first controller Pin 5 via 10kΩ resistor
+  
   Wire.begin();
   Serial.begin(9600);
   while (!Serial);
   Serial.println("\nI2C Scanner - HiTechnic Motor Controller Finder");
+  Serial.println("Pin 22 analog detection enabled for daisy chain");
   Serial.println("Scanning...\n");
 }
 

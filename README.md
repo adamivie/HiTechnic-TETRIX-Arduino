@@ -128,8 +128,10 @@ void loop() {
 - **PositionControl** - Move motors to specific positions
 
 ### Servo Control
-- **BasicServoControl** - Control single servo
+- **BasicServoControl** - Control single servo (recommended starting point)
 - **MultipleServos** - Control all 6 servos
+- **WorkingServoControl** - Complete working example with PWM management
+- **TestBothPWMModes** - Interactive test comparing PWM modes (0xAA vs 0x00)
 
 ### Diagnostic
 - **I2CScanner** - Scan for connected controllers
@@ -170,11 +172,19 @@ uint8_t readVersion();             // Read firmware version
 
 ```cpp
 HiTechnicServo(uint8_t address);   // Constructor
-void begin();                       // Initialize controller
+void begin(uint8_t pwmMode = 0xAA); // Initialize controller
+                                    // pwmMode: 0xAA = no timeout (default)
+                                    //          0x00 = 10-second timeout
 void setServoAngle(uint8_t servo, uint8_t angle);  // Set angle (0-180°)
 void setServoPosition(uint8_t servo, uint8_t position);  // Set position (0-255)
 void centerServo(uint8_t servo);   // Center servo (90°)
-void setStepTime(uint8_t time);    // Set movement speed
+void centerAll();                  // Center all servos
+void setStepTime(uint8_t time);    // Set movement speed (0-15, 0=fastest)
+void disableServo(uint8_t servo);  // Disable servo (no pulse)
+void enableServo(uint8_t servo);   // Re-enable servo
+void refreshPWM();                 // Refresh PWM (for 0x00 mode only)
+uint8_t readVersion();             // Read firmware version
+uint8_t readStatus();              // Read status register
 ```
 
 ## Motor Controller Specifications
@@ -190,8 +200,12 @@ void setStepTime(uint8_t time);    // Set movement speed
 
 - **Channels**: 6 servo outputs
 - **PWM Range**: 0.75ms - 2.25ms (0-255 position value)
-- **Step Time**: 1-15 (adjustable movement speed)
-- **PWM Timeout**: 10 seconds (can be disabled)
+- **Step Time**: 0-15 (0=immediate, 1-15 adjustable movement speed)
+- **PWM Enable Modes**: 
+  - 0xAA = No timeout (default, recommended)
+  - 0x00 = 10-second timeout (requires periodic `refreshPWM()` calls)
+  - 0xFF = Disabled (power-on default)
+- **I2C Address**: 0x04 (default, for 4th controller in daisy chain)
 
 ## Troubleshooting
 
