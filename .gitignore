@@ -1,0 +1,60 @@
+# Arduino build files
+*.elf
+*.hex
+*.eep
+*.lss
+*.map
+*.sym
+*.o
+*.a
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Build directories
+build/
+*.build/
+
+# Arduino CLI
+arduino-cli.exe
+arduino-cli
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+
+# Temporary files
+*.tmp
+*.bak
+*.log
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Desktop.ini
+
+# PDF extracted text
+*.txt
+!LICENSE.txt
+!keywords.txt
+
+# Development/debugging files
+test/
+scratch/
+notes.txt
+TODO.md

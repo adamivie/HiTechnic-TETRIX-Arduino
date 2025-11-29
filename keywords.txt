@@ -1,0 +1,58 @@
+# Arduino IDE Syntax Highlighting Keywords
+# For HiTechnicMotor and HiTechnicServo Libraries
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+HiTechnicMotor	KEYWORD1
+HiTechnicServo	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+begin	KEYWORD2
+setMotorPower	KEYWORD2
+setMotorMode	KEYWORD2
+stopMotor	KEYWORD2
+stopAll	KEYWORD2
+resetEncoder	KEYWORD2
+resetAllEncoders	KEYWORD2
+readEncoder	KEYWORD2
+setTargetPosition	KEYWORD2
+readVersion	KEYWORD2
+isAtTarget	KEYWORD2
+setServoPosition	KEYWORD2
+setServoAngle	KEYWORD2
+setStepTime	KEYWORD2
+getServoPosition	KEYWORD2
+centerServo	KEYWORD2
+centerAll	KEYWORD2
+readStatus	KEYWORD2
+disableServo	KEYWORD2
+enableServo	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+MOTOR_1	LITERAL1
+MOTOR_2	LITERAL1
+MOTOR_BOTH	LITERAL1
+MOTOR_MODE_POWER	LITERAL1
+MOTOR_MODE_SPEED	LITERAL1
+MOTOR_MODE_POSITION	LITERAL1
+MOTOR_MODE_RESET_ENCODER	LITERAL1
+MOTOR_FORWARD	LITERAL1
+MOTOR_REVERSE	LITERAL1
+MOTOR_BRAKE	LITERAL1
+SERVO_1	LITERAL1
+SERVO_2	LITERAL1
+SERVO_3	LITERAL1
+SERVO_4	LITERAL1
+SERVO_5	LITERAL1
+SERVO_6	LITERAL1
+SERVO_MIN_POS	LITERAL1
+SERVO_MAX_POS	LITERAL1
+SERVO_CENTER	LITERAL1
