@@ -57,6 +57,25 @@ class HiTechnicMotor {
     // Set motor power (-100 to 100, negative = reverse)
     void setMotorPower(uint8_t motor, int8_t power);
     
+    // Set motor power with acceleration control (smooth ramping)
+    // power: target power (-100 to 100)
+    // acceleration: power change per update (1-100, higher = faster ramp)
+    void setMotorPowerSmooth(uint8_t motor, int8_t power, uint8_t acceleration = 10);
+    
+    // Update motor power ramping (call this in loop() for smooth acceleration)
+    // Returns true if any motor is still ramping
+    bool update();
+    
+    // Set acceleration rate for all future smooth power changes
+    // acceleration: power change per update cycle (1-100, default 10)
+    void setAcceleration(uint8_t acceleration);
+    
+    // Get current target power (what the motor is ramping toward)
+    int8_t getTargetPower(uint8_t motor);
+    
+    // Get current actual power being sent to motor
+    int8_t getCurrentPower(uint8_t motor);
+    
     // Set motor mode (MOTOR_MODE_POWER, MOTOR_MODE_SPEED, or MOTOR_MODE_POSITION)
     void setMotorMode(uint8_t motor, uint8_t mode);
     
@@ -94,6 +113,14 @@ class HiTechnicMotor {
     
   private:
     uint8_t _address;
+    
+    // Acceleration control variables
+    int8_t _motor1TargetPower;
+    int8_t _motor2TargetPower;
+    int8_t _motor1CurrentPower;
+    int8_t _motor2CurrentPower;
+    uint8_t _acceleration;
+    unsigned long _lastUpdateTime;
     
     // I2C communication helpers
     void writeRegister(uint8_t reg, uint8_t value);

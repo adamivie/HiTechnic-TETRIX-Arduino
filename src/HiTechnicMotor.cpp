@@ -8,6 +8,12 @@
 // Constructor
 HiTechnicMotor::HiTechnicMotor(uint8_t address) {
   _address = address;
+  _motor1TargetPower = 0;
+  _motor2TargetPower = 0;
+  _motor1CurrentPower = 0;
+  _motor2CurrentPower = 0;
+  _acceleration = 10;  // Default acceleration rate
+  _lastUpdateTime = 0;
 }
 
 // Initialize the motor controller
@@ -30,6 +36,16 @@ void HiTechnicMotor::setMotorPower(uint8_t motor, int8_t power) {
   // Constrain power to valid range
   power = constrain(power, -100, 100);
   
+  // Update internal tracking variables for immediate power changes
+  if (motor == MOTOR_1 || motor == MOTOR_BOTH) {
+    _motor1CurrentPower = power;
+    _motor1TargetPower = power;
+  }
+  if (motor == MOTOR_2 || motor == MOTOR_BOTH) {
+    _motor2CurrentPower = power;
+    _motor2TargetPower = power;
+  }
+  
   // Per spec: must set MODE before POWER for proper operation
   if (motor == MOTOR_1 || motor == MOTOR_BOTH) {
     writeRegister(HT_MOTOR1_MODE, MOTOR_MODE_POWER);  // Set to power control mode
@@ -40,6 +56,106 @@ void HiTechnicMotor::setMotorPower(uint8_t motor, int8_t power) {
     writeRegister(HT_MOTOR2_MODE, MOTOR_MODE_POWER);  // Set to power control mode
     writeRegister(HT_MOTOR2_POWER, (uint8_t)power);
   }
+}
+
+// Set motor power with smooth acceleration ramping
+void HiTechnicMotor::setMotorPowerSmooth(uint8_t motor, int8_t power, uint8_t acceleration) {
+  // Constrain power to valid range
+  power = constrain(power, -100, 100);
+  
+  // Set target power - actual power will ramp to this value
+  if (motor == MOTOR_1 || motor == MOTOR_BOTH) {
+    _motor1TargetPower = power;
+  }
+  if (motor == MOTOR_2 || motor == MOTOR_BOTH) {
+    _motor2TargetPower = power;
+  }
+  
+  // Store acceleration rate if provided
+  if (acceleration > 0) {
+    _acceleration = constrain(acceleration, 1, 100);
+  }
+}
+
+// Update motor power ramping (call this regularly in loop())
+bool HiTechnicMotor::update() {
+  unsigned long currentTime = millis();
+  
+  // Limit update rate to avoid overwhelming I2C bus
+  if (currentTime - _lastUpdateTime < 20) {  // Update every 20ms max
+    return (_motor1CurrentPower != _motor1TargetPower || 
+            _motor2CurrentPower != _motor2TargetPower);
+  }
+  
+  _lastUpdateTime = currentTime;
+  bool stillRamping = false;
+  
+  // Ramp Motor 1
+  if (_motor1CurrentPower != _motor1TargetPower) {
+    stillRamping = true;
+    
+    if (_motor1CurrentPower < _motor1TargetPower) {
+      _motor1CurrentPower += _acceleration;
+      if (_motor1CurrentPower > _motor1TargetPower) {
+        _motor1CurrentPower = _motor1TargetPower;
+      }
+    } else {
+      _motor1CurrentPower -= _acceleration;
+      if (_motor1CurrentPower < _motor1TargetPower) {
+        _motor1CurrentPower = _motor1TargetPower;
+      }
+    }
+    
+    writeRegister(HT_MOTOR1_MODE, MOTOR_MODE_POWER);
+    writeRegister(HT_MOTOR1_POWER, (uint8_t)_motor1CurrentPower);
+  }
+  
+  // Ramp Motor 2
+  if (_motor2CurrentPower != _motor2TargetPower) {
+    stillRamping = true;
+    
+    if (_motor2CurrentPower < _motor2TargetPower) {
+      _motor2CurrentPower += _acceleration;
+      if (_motor2CurrentPower > _motor2TargetPower) {
+        _motor2CurrentPower = _motor2TargetPower;
+      }
+    } else {
+      _motor2CurrentPower -= _acceleration;
+      if (_motor2CurrentPower < _motor2TargetPower) {
+        _motor2CurrentPower = _motor2TargetPower;
+      }
+    }
+    
+    writeRegister(HT_MOTOR2_MODE, MOTOR_MODE_POWER);
+    writeRegister(HT_MOTOR2_POWER, (uint8_t)_motor2CurrentPower);
+  }
+  
+  return stillRamping;
+}
+
+// Set acceleration rate for smooth power changes
+void HiTechnicMotor::setAcceleration(uint8_t acceleration) {
+  _acceleration = constrain(acceleration, 1, 100);
+}
+
+// Get current target power
+int8_t HiTechnicMotor::getTargetPower(uint8_t motor) {
+  if (motor == MOTOR_1) {
+    return _motor1TargetPower;
+  } else if (motor == MOTOR_2) {
+    return _motor2TargetPower;
+  }
+  return 0;
+}
+
+// Get current actual power
+int8_t HiTechnicMotor::getCurrentPower(uint8_t motor) {
+  if (motor == MOTOR_1) {
+    return _motor1CurrentPower;
+  } else if (motor == MOTOR_2) {
+    return _motor2CurrentPower;
+  }
+  return 0;
 }
 
 // Set motor mode

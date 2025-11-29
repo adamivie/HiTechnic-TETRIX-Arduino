@@ -76,11 +76,44 @@ void setup() {
 
 void loop() {
   // Run motor 1 on controller 1 at 50% forward
-  controller1.setMotorPower(1, 50);
+  controller1.setMotorPower(MOTOR_1, 50);
   delay(2000);
   
   // Stop motor
-  controller1.setMotorPower(1, 0);
+  controller1.setMotorPower(MOTOR_1, 0);
+  delay(1000);
+}
+```
+
+### Smooth Acceleration
+
+```cpp
+#include "HiTechnicMotor.h"
+
+HiTechnicMotor controller(0x01);
+
+void setup() {
+  controller.begin();
+  controller.setAcceleration(10);  // Set acceleration rate (1-100)
+}
+
+void loop() {
+  // Smoothly ramp motor to 80% power
+  controller.setMotorPowerSmooth(MOTOR_1, 80);
+  
+  // Call update() regularly to handle ramping
+  while (controller.update()) {
+    delay(20);  // Update every 20ms
+  }
+  
+  delay(2000);
+  
+  // Smoothly ramp back to stop
+  controller.setMotorPowerSmooth(MOTOR_1, 0);
+  while (controller.update()) {
+    delay(20);
+  }
+  
   delay(1000);
 }
 ```
@@ -109,12 +142,27 @@ void loop() {
 ```cpp
 HiTechnicMotor(uint8_t address);  // Constructor
 void begin();                      // Initialize controller
+
+// Basic motor control
 void setMotorPower(uint8_t motor, int8_t power);  // Set motor power (-100 to 100)
+
+// Smooth acceleration control
+void setMotorPowerSmooth(uint8_t motor, int8_t power, uint8_t acceleration = 10);
+void setAcceleration(uint8_t acceleration);  // Set default acceleration rate (1-100)
+bool update();                     // Update motor ramping (call in loop())
+int8_t getTargetPower(uint8_t motor);   // Get target power
+int8_t getCurrentPower(uint8_t motor);  // Get current actual power
+
+// Motor control
 void stopMotor(uint8_t motor);     // Stop specific motor
 void stopAllMotors();              // Stop both motors
+
+// Encoder functions
 int32_t readEncoder(uint8_t motor);  // Read encoder value
 void resetEncoder(uint8_t motor);  // Reset encoder to zero
 void setTargetPosition(uint8_t motor, int32_t target);  // Position control
+
+// Utility
 uint8_t readVersion();             // Read firmware version
 ```
 
