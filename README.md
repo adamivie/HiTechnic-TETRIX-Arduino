@@ -9,6 +9,8 @@ Complete Arduino library for controlling HiTechnic TETRIX DC Motor and Servo Con
 - ✅ Control HiTechnic TETRIX DC Motor Controllers (NMO1038)
 - ✅ Control HiTechnic TETRIX Servo Controllers (NSR1038)
 - ✅ Support for daisy-chained controllers (up to 4 controllers)
+- ✅ **Flexible daisy chain configurations** - any mix of motor/servo controllers
+- ✅ Automatic controller type detection
 - ✅ Independent control of 6 DC motors (3 controllers × 2 motors)
 - ✅ Independent control of 6 servo motors (1 controller × 6 servos)
 - ✅ Encoder reading and position control
@@ -36,10 +38,13 @@ Arduino Mega 2560
 ```
 
 The 10kΩ resistor provides 5V analog detection for automatic daisy chain addressing:
-- First controller → Address 0x01
-- Second controller → Address 0x02
-- Third controller → Address 0x03
-- Fourth controller → Address 0x04
+- First controller (any type) → Address 0x01
+- Second controller (any type) → Address 0x02
+- Third controller (any type) → Address 0x03
+- Fourth controller (any type) → Address 0x04
+
+**Note:** Controller type (motor/servo) doesn't affect addressing - position in chain determines address!
+See [Daisy Chain Configurations Guide](docs/DAISY_CHAIN_CONFIGURATIONS.md) for all possible setups.
 
 ### Installation
 
@@ -134,7 +139,9 @@ void loop() {
 - **TestBothPWMModes** - Interactive test comparing PWM modes (0xAA vs 0x00)
 
 ### Diagnostic
+- **ConfigurationHelper** - Interactive setup for identifying your controllers ✨ **RECOMMENDED**
 - **I2CScanner** - Scan for connected controllers
+- **ControllerConfigIdentifier** - Auto-detect controller types (experimental)
 - **DaisyChainAddressTest** - Verify daisy chain addressing
 
 ## Library Reference
@@ -213,6 +220,12 @@ uint8_t readStatus();              // Read status register
 - Verify 10kΩ resistor connection from Pin 22 to first controller Pin 5
 - Power cycle all controllers
 - Run `I2CScanner` example to verify addresses
+- **NEW**: Run `ControllerConfigIdentifier` to auto-detect your setup
+
+### Wrong controller addresses in code
+- Physical position in chain determines address, not controller type
+- Use `ControllerConfigIdentifier` example to generate correct configuration code
+- See [Daisy Chain Configurations Guide](docs/DAISY_CHAIN_CONFIGURATIONS.md) for examples
 
 ### Motor crosstalk (one motor triggers another)
 - Ensure you're setting MODE register before POWER register
@@ -235,6 +248,16 @@ The HiTechnic controllers use 5V analog detection through a 10kΩ resistor for a
 3. Second controller detects forwarded voltage → assigns address 0x02
 4. Process continues for up to 4 controllers
 
+**Important:** The address is determined by **physical position** in the chain, not by controller type. You can mix motor and servo controllers in any order!
+
+**Common Configurations:**
+- 3 Motors + 1 Servo (0x01, 0x02, 0x03, 0x04)
+- 1 Servo + 3 Motors (servo at 0x01, motors at 0x02-0x04)
+- 2 Motors + 2 Servos (any order)
+- Any mix up to 4 total controllers
+
+See [Daisy Chain Configurations Guide](docs/DAISY_CHAIN_CONFIGURATIONS.md) for detailed examples.
+
 ### Register Map
 
 See `docs/SPECIFICATIONS.md` for complete register documentation.
@@ -247,6 +270,7 @@ The library automatically sets the MODE register before the POWER register, whic
 
 - [Complete Wiring Guide](docs/WIRING.md)
 - [Daisy Chain Setup](docs/DAISY_CHAIN_ADDRESSING.md)
+- [**Daisy Chain Configurations**](docs/DAISY_CHAIN_CONFIGURATIONS.md) ✨ **NEW - Multiple setup examples**
 - [API Reference](docs/API_REFERENCE.md)
 - [Specifications](docs/SPECIFICATIONS.md)
 - [Troubleshooting](docs/TROUBLESHOOTING.md)
